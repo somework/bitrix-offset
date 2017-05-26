@@ -1,0 +1,9 @@
+### Composer template
+composer.phar
+/vendor/
+
+### PhpUnit
+phpunit.phar
+
+### Php cs fixer
+.php_cs.cache
