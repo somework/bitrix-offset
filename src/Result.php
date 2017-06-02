@@ -18,11 +18,19 @@ class Result
      */
     private $generator;
 
+    /**
+     * Result constructor.
+     *
+     * @param \Generator $generator
+     */
     public function __construct(\Generator $generator)
     {
         $this->generator = $generator;
     }
 
+    /**
+     * @return null|mixed
+     */
     public function fetch()
     {
         if ($this->generator->valid()) {
@@ -30,6 +38,6 @@ class Result
             $this->generator->next();
             return $value;
         }
-        return false;
+        return null;
     }
 }
