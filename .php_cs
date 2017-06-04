@@ -1,7 +1,7 @@
 <?php
 
 $header = <<<EOF
-This file is part of the Bitrix/Offset package.
+This file is part of the SomeWork/OffsetPage package.
 
 (c) Pinchuk Igor <i.pinchuk.work@gmail.com>
 

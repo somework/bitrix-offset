@@ -1,21 +1,33 @@
 <?php
 
+/*
+ * This file is part of the SomeWork/OffsetPage package.
+ *
+ * (c) Pinchuk Igor <i.pinchuk.work@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-namespace SomeWork\Bitrix\Offset;
-
+namespace SomeWork\OffsetPage;
 
 class OffsetResult implements SourceResultInterface
 {
     /**
      * @var \Generator
      */
-    private $generator;
+    protected $generator;
 
     /**
      * @var int
      */
-    private $totalCount;
+    protected $totalCount = 0;
 
+    /**
+     * OffsetResult constructor.
+     *
+     * @param \Generator $generator
+     */
     public function __construct(\Generator $generator)
     {
         $this->totalCount = 0;
@@ -24,18 +36,34 @@ class OffsetResult implements SourceResultInterface
 
     /**
      * @return \Generator
+     * @throws \InvalidArgumentException
      */
-    public function generator()
+    public function generator(): \Generator
     {
         while ($sourceResult = $this->getSourceResult()) {
             if (!is_object($sourceResult) || !($sourceResult instanceof SourceResultInterface)) {
-                continue;
+                throw new \InvalidArgumentException(sprintf(
+                    'Result of generator is not an instance of %s',
+                    SourceResultInterface::class
+                ));
             }
-            if ($sourceResult->getTotalCount() > $this->totalCount) {
-                $this->totalCount = $sourceResult->getTotalCount();
+            $sourceCount = $sourceResult->getTotalCount();
+            if ($sourceCount > $this->totalCount) {
+                $this->totalCount = $sourceCount;
             }
-            yield from $sourceResult->generator();
+
+            foreach ($sourceResult->generator() as $result) {
+                yield $result;
+            }
         }
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalCount(): int
+    {
+        return $this->totalCount;
     }
 
     protected function getSourceResult()
@@ -46,13 +74,5 @@ class OffsetResult implements SourceResultInterface
             return $value;
         }
         return null;
-    }
-
-    /**
-     * @return int
-     */
-    public function getTotalCount()
-    {
-        return $this->totalCount;
     }
 }

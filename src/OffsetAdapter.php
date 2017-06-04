@@ -1,8 +1,15 @@
 <?php
 
+/*
+ * This file is part of the SomeWork/OffsetPage package.
+ *
+ * (c) Pinchuk Igor <i.pinchuk.work@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-namespace SomeWork\Bitrix\Offset;
-
+namespace SomeWork\OffsetPage;
 
 class OffsetAdapter
 {
@@ -17,63 +24,39 @@ class OffsetAdapter
     }
 
     /**
-     * @param int $limit
      * @param int $offset
      *
-     * @return SourceResultInterface
+     * @param int $limit
+     * @param int $nowCount
+     *
+     * @return \SomeWork\OffsetPage\SourceResultInterface
+     * @throws \LogicException
      */
-    public function execute($offset, $limit)
+    public function execute($offset, $limit, $nowCount = 0): SourceResultInterface
     {
-        $result = new OffsetResult($this->logic($offset, $limit));
+        return new OffsetResult($this->logic($offset, $limit, $nowCount));
     }
 
     /**
      * @param $offset
      * @param $limit
+     * @param $nowCount
      *
      * @return \Generator
+     * @throws \LogicException
      */
-    public function logic($offset, $limit)
+    protected function logic($offset, $limit, $nowCount)
     {
-        $offset = (int)$offset;
-        $limit = (int)$limit;
-
-        $offset = $offset >= 0 ? $offset : 0;
-        $limit = $limit >= 0 ? $limit : 0;
-
-        if ($offset === 0 && $limit > 0) {
-            yield $this->source->execute(1, $limit);
-            return;
-        }
-
-        if ($offset > 0 && $limit === 0) {
-            $result = $this->source->execute(2, $offset);
-            $totalCount = $result->getTotalCount();
+        while ($offsetResult = Offset::logic($offset, $limit, $nowCount)) {
+            $result = $this->source->execute($offsetResult['page'], $offsetResult['size']);
+            $nowCount += $offsetResult['size'];
+            /**
+             * todo logic to break
+             */
+            if ($nowCount > $result->getTotalCount()) {
+                break;
+            }
             yield $result;
-
-            $need = $totalCount - $offset;
-            while ($need > 0) {
-                $need -= $offset;
-                yield $this->source->execute(2, $offset);
-            }
-        }
-
-        if ($offset > 0 && $limit > 0) {
-            yield $this->source->execute(2, $offset);
-            $need = $limit - $offset;
-            while ($need > 0) {
-                if ($need < $offset) {
-                    $page = (int)floor($offset / $need);
-                    $pageSize = $offset / $page;
-                    $need -= $pageSize;
-                    yield $this->source->execute($page, $pageSize);
-                } else {
-                    $need -= $offset;
-                    yield $this->source->execute(2, $offset);
-                }
-            }
         }
     }
-
-
 }

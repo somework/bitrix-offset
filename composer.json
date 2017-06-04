@@ -1,6 +1,6 @@
 {
-  "name": "somework/bitrix-offset",
-  "description": "Helper for fetch realy needed count of items",
+  "name": "somework/offset-page",
+  "description": "Adapter to fetch items from source that know only pages",
   "minimum-stability": "dev",
   "license": "MIT",
   "authors": [
@@ -11,16 +11,16 @@
   ],
   "autoload": {
     "psr-4": {
-      "SomeWork\\Bitrix\\Offset\\": "src/"
+      "SomeWork\\OffsetPage\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "SomeWork\\Bitrix\\Offset\\": "tests/"
+      "SomeWork\\OffsetPage\\Tests\\": "tests/"
     }
   },
   "require": {
-    "php": ">=5.5.0"
+    "php": ">=7.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^5.7"
